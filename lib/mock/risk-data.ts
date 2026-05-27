@@ -1,4 +1,4 @@
-import type { RiskItem, ActionItem } from "@/lib/types";
+import type { RiskItem, ActionItem, RiskCategory } from "@/lib/types";
 
 export const RISK_ITEMS: RiskItem[] = [
   {
@@ -13,6 +13,7 @@ export const RISK_ITEMS: RiskItem[] = [
     createdAt: "2026-04-15",
     dueAt: "2026-06-30",
     action: "兩週內提出重新編列方案：補人、調目標、或調整商業模式三選一。",
+    impact: 5, probability: 5,
   },
   {
     id: "r-02",
@@ -26,12 +27,13 @@ export const RISK_ITEMS: RiskItem[] = [
     createdAt: "2026-03-01",
     dueAt: "2026-07-01",
     action: "Q2 內完成行銷主管定位 + 1 名企劃到職，並先以外包補位。",
+    impact: 5, probability: 4,
   },
   {
     id: "r-03",
-    title: "原物料連動上漲 40%（系統櫃 / 板材）",
+    title: "原物料連動上漲 40%（鋁料 / 板材）",
     description:
-      "供應商 4 月起連續調漲，整體裝修成本上升約 12–15%；既有合約多為固定價，毛利壓縮。",
+      "供應商 4 月起連續調漲、鋁料 5 月已較年初 +40%、板材 +38%；整體裝修成本上升約 12–15%，既有合約多為固定價，毛利壓縮。",
     severity: "high",
     owner: "設計部主管",
     buId: "group",
@@ -39,6 +41,7 @@ export const RISK_ITEMS: RiskItem[] = [
     createdAt: "2026-04-20",
     dueAt: "2026-06-15",
     action: "新案合約加入物料連動條款；舊案盤點補價可能性。",
+    impact: 4, probability: 5,
   },
   {
     id: "r-04",
@@ -52,6 +55,7 @@ export const RISK_ITEMS: RiskItem[] = [
     createdAt: "2026-02-10",
     dueAt: "2026-06-01",
     action: "本月內決定轉正、外聘或維持暫代並公開說明。",
+    impact: 3, probability: 5,
   },
   {
     id: "r-05",
@@ -65,6 +69,7 @@ export const RISK_ITEMS: RiskItem[] = [
     createdAt: "2026-03-25",
     dueAt: "2026-06-15",
     action: "重新分配信義案件至外援，或正式調整職務與薪酬。",
+    impact: 3, probability: 4,
   },
   {
     id: "r-06",
@@ -77,6 +82,7 @@ export const RISK_ITEMS: RiskItem[] = [
     category: "operation",
     createdAt: "2026-05-08",
     action: "本週內完成 Top 10 SKU 商品頁 audit、暫停低 ROAS 廣告組。",
+    impact: 3, probability: 4,
   },
   {
     id: "r-07",
@@ -90,6 +96,7 @@ export const RISK_ITEMS: RiskItem[] = [
     createdAt: "2026-04-01",
     dueAt: "2026-08-01",
     action: "評估導入雲端會計系統並補實 1 名會計人員。",
+    impact: 3, probability: 5,
   },
   {
     id: "r-08",
@@ -103,6 +110,21 @@ export const RISK_ITEMS: RiskItem[] = [
     createdAt: "2026-05-12",
     dueAt: "2026-06-30",
     action: "5 月底前簽下 2 個新建案、否則啟動人力凍結。",
+    impact: 4, probability: 4,
+  },
+  {
+    id: "r-09",
+    title: "90 天以上應收帳款 140 萬",
+    description:
+      "90+ 天 AR 集中於 2 個客戶、佔總 AR 5.8%；其中羅東透天案戶帳款超過 120 天。",
+    severity: "medium",
+    owner: "蔡明慧",
+    buId: "group",
+    category: "finance",
+    createdAt: "2026-05-01",
+    dueAt: "2026-06-30",
+    action: "本月內完成催收、必要時轉法務並重估往來條件。",
+    impact: 3, probability: 3,
   },
 ];
 
@@ -143,3 +165,20 @@ export function getTopActions(limit = 5): ActionItem[] {
       dueAt: r.dueAt,
     }));
 }
+
+export function getRisksByCategory(category: RiskCategory | "all") {
+  if (category === "all") return getUnresolvedRisks();
+  return getUnresolvedRisks().filter((r) => r.category === category);
+}
+
+export function getRisksByBu(buId: string) {
+  return getUnresolvedRisks().filter((r) => r.buId === buId);
+}
+
+export const RISK_CATEGORY_LABEL: Record<RiskCategory, string> = {
+  people: "人事",
+  finance: "財務",
+  operation: "營運",
+  market: "市場",
+  compliance: "法遵",
+};

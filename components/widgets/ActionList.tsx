@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getTopActions } from "@/lib/mock/risk-data";
 import { BU_MAP } from "@/lib/mock/bu-data";
-import type { RiskSeverity } from "@/lib/types";
+import type { ActionItem, RiskSeverity } from "@/lib/types";
 
 const SEVERITY_STYLE: Record<RiskSeverity, { dot: string; label: string; text: string }> = {
   critical: { dot: "bg-danger", label: "紅燈", text: "text-danger" },
@@ -13,12 +13,25 @@ const SEVERITY_STYLE: Record<RiskSeverity, { dot: string; label: string; text: s
   low: { dot: "bg-muted-foreground", label: "低", text: "text-muted-foreground" },
 };
 
-export function ActionList({ limit = 5 }: { limit?: number }) {
-  const actions = getTopActions(limit);
+interface ActionListProps {
+  /** 自訂行動清單；未提供時取全公司 Top N */
+  actions?: ActionItem[];
+  limit?: number;
+}
+
+export function ActionList({ actions, limit = 5 }: ActionListProps) {
+  const items = actions ?? getTopActions(limit);
+  if (items.length === 0) {
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        目前無待處理項目。
+      </p>
+    );
+  }
 
   return (
     <ul className="divide-y divide-border">
-      {actions.map((a, idx) => {
+      {items.map((a, idx) => {
         const s = SEVERITY_STYLE[a.severity];
         const buLabel =
           a.buId && a.buId !== "group" ? BU_MAP[a.buId]?.name : "集團";

@@ -18,6 +18,12 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     activeProjects: 11,
     headcount: 12,
     status: "amber",
+    statusReason: [
+      "YTD 達成 32.3%、略低於線性目標 41.7%（5/12），落後但可追。",
+      "5 月簽約量回穩，月營收 620 萬為近半年高點。",
+      "設計師人均負載已達 1.4 案/人，再接案將影響交付品質。",
+      "主管職由許舒婷暫代逾三個月仍未轉正、指揮鏈不穩。",
+    ],
     note: "5 月簽約量回穩，但設計師人均負載已達警戒。",
     accentHex: "#0f766e", // teal-700
   },
@@ -33,6 +39,12 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     activeProjects: 6,
     headcount: 5,
     status: "red",
+    statusReason: [
+      "YTD 30.2%、進度落後線性目標 41.7% 達 11.5 個百分點。",
+      "現有 5 人對應 5,000 萬目標、人均產值需 1,000 萬，業界標準約 600–700 萬。",
+      "陳又暐長期兼職、近兩月加班 60+ 小時，離職風險升高。",
+      "行銷部完全空缺，信義店無在地曝光策略、新案進線量持續下滑。",
+    ],
     note: "人力與目標落差大，行銷曝光不足，需重新評估策略。",
     accentHex: "#b45309", // amber-700
   },
@@ -48,6 +60,11 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     activeProjects: 18,
     headcount: 7,
     status: "green",
+    statusReason: [
+      "YTD 38.3%、領先線性目標 41.7% 但差距僅 3.4 點，可視為達標。",
+      "輕裝修客單價穩定、回頭客比例 22%（產業平均 12%）。",
+      "工務排程已排到 8 月、現金流穩健。",
+    ],
     note: "輕裝修需求穩定，建議鎖定北宜兩地小坪數市場。",
     accentHex: "#4f46e5", // indigo-600
   },
@@ -63,6 +80,11 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     activeProjects: 4,
     headcount: 0,                  // 目前空編，由總管理處兼辦
     status: "red",
+    statusReason: [
+      "編制 0 人、由總管理處兼辦，人力結構不可持續。",
+      "Q2 起無新建案合作合約進帳排程、6 月後營收可能斷層。",
+      "目前 4 個專案皆為延續案、結案後將出現空窗期。",
+    ],
     note: "行銷部完全空缺，目前由總管理處兼辦，急需建編。",
     accentHex: "#dc2626", // red-600
   },
@@ -78,6 +100,11 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     activeProjects: 1,
     headcount: 3,
     status: "green",
+    statusReason: [
+      "宜蘭門市 YTD 36.7%、與線性目標差 5 點以內。",
+      "5 月新增聯名商品線、客單價 + 18%。",
+      "信義店非直營暫不計入合併營收。",
+    ],
     note: "宜蘭門市表現穩定；信義門市非直營暫不計入。",
     accentHex: "#059669", // emerald-600
   },
@@ -93,6 +120,11 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     activeProjects: 0,
     headcount: 2,
     status: "amber",
+    statusReason: [
+      "YTD 28%、落後線性目標 41.7% 達 13.7 點，是落差最大的 BU。",
+      "5 月轉換率自 1.8% 降至 1.48%、廣告 ROAS 同步下滑。",
+      "目前僅 2 人運營、行銷端外包品質不穩定。",
+    ],
     note: "5 月轉換率下滑，需檢視主力 SKU 的商品頁與廣告組合。",
     accentHex: "#7c3aed", // violet-600
   },
