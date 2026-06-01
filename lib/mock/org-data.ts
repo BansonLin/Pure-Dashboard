@@ -107,14 +107,7 @@ export const ORG_STRUCTURE: OrgStructure = {
       headcountTarget: 4,
       headcountActual: 0,
       head: undefined,
-      members: [
-        {
-          id: "p-m1", name: "（編制 ×4 全部空缺）",
-          title: "包含主管 1、企劃 2、設計 1",
-          department: "行銷企劃部", status: "vacant",
-          note: "目前由總管理處與 Banson 兼辦對外行銷事務。",
-        },
-      ],
+      members: [],
     },
     {
       id: "dept-admin",
@@ -249,6 +242,10 @@ export function buildOrgTree(): OrgNode {
               : d.headcountActual < d.headcountTarget
                 ? ("vacant" as const)
                 : undefined,
+          meta:
+            d.headcountActual === 0
+              ? "目前由總管理處與 Banson 兼辦相關事務"
+              : undefined,
           children: [
             ...(d.head
               ? [

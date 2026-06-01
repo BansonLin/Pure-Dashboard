@@ -4,7 +4,19 @@ import type { AgingBucket } from "@/lib/types";
 interface AgingTableProps {
   title: string;
   buckets: AgingBucket[];
+  /** 應收 = success 色系；應付 = neutral 色系 */
+  tone?: "receivable" | "payable";
 }
+
+const TONE_STRIP: Record<NonNullable<AgingTableProps["tone"]>, string> = {
+  receivable: "bg-success",
+  payable: "bg-foreground/70",
+};
+
+const TONE_LABEL: Record<NonNullable<AgingTableProps["tone"]>, string> = {
+  receivable: "應收",
+  payable: "應付",
+};
 
 const LEVEL_BAR: Record<AgingBucket["level"], string> = {
   green: "bg-success",
@@ -18,7 +30,7 @@ const LEVEL_TEXT: Record<AgingBucket["level"], string> = {
   red: "text-danger",
 };
 
-export function AgingTable({ title, buckets }: AgingTableProps) {
+export function AgingTable({ title, buckets, tone = "receivable" }: AgingTableProps) {
   const total = buckets.reduce((s, b) => s + b.amount, 0);
   const overdue = buckets
     .filter((b) => b.level !== "green")
@@ -26,9 +38,22 @@ export function AgingTable({ title, buckets }: AgingTableProps) {
   const overdueRatio = total > 0 ? overdue / total : 0;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="relative overflow-hidden rounded-xl border border-border bg-card p-5">
+      <span className={cn("absolute left-0 top-0 h-full w-0.5", TONE_STRIP[tone])} />
       <div className="flex items-baseline justify-between">
-        <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+              tone === "receivable"
+                ? "bg-success/15 text-success"
+                : "bg-foreground/10 text-foreground/80",
+            )}
+          >
+            {TONE_LABEL[tone]}
+          </span>
+          <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
+        </div>
         <span className="text-xs text-muted-foreground tabular-nums">
           合計 {formatTwd(total)}
         </span>

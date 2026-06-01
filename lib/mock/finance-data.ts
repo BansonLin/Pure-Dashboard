@@ -88,9 +88,10 @@ export function getGroupYtdPnl() {
 /**
  * 集團 2026 年 YTD 現金流瀑布
  * 起：1/1 期初現金；終：5/31 期末現金
+ * 期末現金由前面節點累加而成，避免手動寫死失準。
  */
-export const CASH_FLOW: CashFlowNode[] = [
-  { label: "期初現金", amount: 32_000_000, type: "total" },
+const CASH_FLOW_OPENING = 32_000_000;
+const CASH_FLOW_DELTAS: Array<Omit<CashFlowNode, "type"> & { type: "in" | "out" }> = [
   { label: "營業收入", amount: 91_300_000, type: "in" },
   { label: "材料 / 工資", amount: -55_400_000, type: "out" },
   { label: "薪資費用", amount: -14_200_000, type: "out" },
@@ -98,7 +99,16 @@ export const CASH_FLOW: CashFlowNode[] = [
   { label: "行銷支出", amount: -2_400_000, type: "out" },
   { label: "稅 / 利息", amount: -1_900_000, type: "out" },
   { label: "資本支出", amount: -4_500_000, type: "out" },
-  { label: "期末現金", amount: 41_100_000, type: "total" },
+];
+
+export const CASH_FLOW: CashFlowNode[] = [
+  { label: "期初現金", amount: CASH_FLOW_OPENING, type: "total" },
+  ...CASH_FLOW_DELTAS,
+  {
+    label: "期末現金",
+    amount: CASH_FLOW_DELTAS.reduce((s, n) => s + n.amount, CASH_FLOW_OPENING),
+    type: "total",
+  },
 ];
 
 /** 應收帳款 Aging（5/31 餘額，單位：元） */

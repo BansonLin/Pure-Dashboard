@@ -117,10 +117,12 @@ export default function FinancePage() {
           <AgingTable
             title={`應收帳款 Aging · 合計 ${formatTwd(arTotal)}`}
             buckets={AR_AGING}
+            tone="receivable"
           />
           <AgingTable
             title={`應付帳款 Aging · 合計 ${formatTwd(apTotal)}`}
             buckets={AP_AGING}
+            tone="payable"
           />
         </section>
 

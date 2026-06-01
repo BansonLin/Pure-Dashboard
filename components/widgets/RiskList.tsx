@@ -35,6 +35,27 @@ const FILTERS: Array<{ key: RiskCategory | "all"; label: string }> = [
 
 export function RiskList() {
   const [active, setActive] = React.useState<RiskCategory | "all">("all");
+
+  // When the page is opened with a hash (e.g. /risk#r-03) — typically from the
+  // risk matrix — reset to "all" so the target row is guaranteed visible, then
+  // scroll it into view.
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash.replace(/^#/, "");
+    if (!hash) return;
+    const target = RISK_ITEMS.find((r) => r.id === hash);
+    if (!target) return;
+    setActive("all");
+    // Wait a tick for the (potentially un-filtered) item to render.
+    const t = window.setTimeout(() => {
+      document.getElementById(hash)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 50);
+    return () => window.clearTimeout(t);
+  }, []);
+
   const filtered =
     active === "all"
       ? RISK_ITEMS
