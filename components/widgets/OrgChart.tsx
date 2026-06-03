@@ -31,7 +31,12 @@ export function OrgChart() {
   const tree = buildOrgTree();
   return (
     <div className="space-y-6">
-      <Legend />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Legend />
+        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground sm:hidden">
+          ← 左右滑動 →
+        </span>
+      </div>
       <div className="overflow-x-auto">
         <div className="flex min-w-fit flex-col items-center gap-6 py-2">
           <NodeBox node={tree} />

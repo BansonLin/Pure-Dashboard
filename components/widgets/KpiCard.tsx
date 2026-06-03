@@ -35,12 +35,12 @@ export function KpiCard({
   className,
   accent = "default",
 }: KpiCardProps) {
-  const trendColor =
+  const trendStyle =
     trend === "up"
-      ? "text-success"
+      ? "bg-success/10 text-success"
       : trend === "down"
-      ? "text-danger"
-      : "text-muted-foreground";
+        ? "bg-danger/10 text-danger"
+        : "bg-muted text-muted-foreground";
 
   return (
     <div
@@ -70,7 +70,12 @@ export function KpiCard({
           {value}
         </span>
         {delta && (
-          <span className={cn("text-xs font-medium tabular-nums", trendColor)}>
+          <span
+            className={cn(
+              "rounded-md px-1.5 py-0.5 text-[11px] font-semibold tabular-nums",
+              trendStyle,
+            )}
+          >
             {delta}
           </span>
         )}
