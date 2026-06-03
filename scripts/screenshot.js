@@ -1,5 +1,8 @@
 /* eslint-disable */
 // Screenshot driver — runs headless Chromium against the dev server.
+// Local-only helper. Install ad-hoc when needed:
+//   npm install --no-save playwright
+// then `npm start &` and `node scripts/screenshot.js`.
 const { chromium } = require("playwright");
 const fs = require("fs");
 const path = require("path");
