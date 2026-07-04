@@ -4,10 +4,10 @@ import * as React from "react";
 import { Calendar, User, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { getUnresolvedRisks, RISK_CATEGORY_LABEL } from "@/lib/mock/risk-data";
-import { BU_MAP } from "@/lib/mock/bu-data";
+import { RISK_CATEGORY_LABEL } from "@/lib/ui/severity";
 import { SEVERITY_META } from "@/lib/ui/severity";
 import { formatMonthDay } from "@/lib/report-date";
+import type { RiskItemView } from "@/lib/data";
 import type { RiskCategory } from "@/lib/types";
 
 const FILTERS: Array<{ key: RiskCategory | "all"; label: string }> = [
@@ -19,8 +19,7 @@ const FILTERS: Array<{ key: RiskCategory | "all"; label: string }> = [
   { key: "compliance", label: "法遵" },
 ];
 
-export function RiskList() {
-  const risks = getUnresolvedRisks();
+export function RiskList({ risks }: { risks: RiskItemView[] }) {
   const [active, setActive] = React.useState<RiskCategory | "all">("all");
 
   // 從風險矩陣圓點（/risk#r-xx）進來時：不論是初次載入還是同頁 hash 變更，
@@ -40,7 +39,7 @@ export function RiskList() {
     locate();
     window.addEventListener("hashchange", locate);
     return () => window.removeEventListener("hashchange", locate);
-    // risks 來自 mock、每次 render 內容相同，僅在 mount 綁定即可
+    // risks 為 server 傳入的靜態快照，僅在 mount 綁定即可
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -87,8 +86,7 @@ export function RiskList() {
         )}
         {filtered.map((r) => {
           const s = SEVERITY_META[r.severity];
-          const buName =
-            r.buId && r.buId !== "group" ? BU_MAP[r.buId]?.name : "集團";
+          const buName = r.buName;
           return (
             <li
               key={r.id}

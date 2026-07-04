@@ -7,6 +7,7 @@ import type {
 } from "@/lib/types";
 import { MONTHLY_REVENUE } from "./revenue-data";
 import { BUSINESS_UNITS } from "./bu-data";
+import { derivePnl } from "@/lib/pnl";
 
 /**
  * 各 BU 的直接成本率與營業費用率（穩定假設，便於由營收反推 P&L）
@@ -56,19 +57,6 @@ export function getGroupMonthlyPnl(): PnlRow[] {
       opex: Math.round(opex),
     };
   });
-}
-
-/** 衍生欄位 */
-export function derivePnl(row: PnlRow) {
-  const grossProfit = row.revenue - row.cost;
-  const netIncome = grossProfit - row.opex;
-  return {
-    ...row,
-    grossProfit,
-    grossMargin: row.revenue > 0 ? grossProfit / row.revenue : 0,
-    netIncome,
-    netMargin: row.revenue > 0 ? netIncome / row.revenue : 0,
-  };
 }
 
 /** 集團 YTD 累計損益 */
@@ -170,10 +158,3 @@ export const MATERIAL_INDEX: MaterialIndexPoint[] = [
   },
 ];
 
-export const MATERIAL_COLORS: Record<string, string> = {
-  鋁料: "#dc2626",      // red-600
-  鋼材: "#ea580c",      // orange-600
-  板材: "#b45309",      // amber-700
-  系統櫃面料: "#7c3aed", // violet-600
-  油漆: "#0ea5e9",       // sky-500
-};

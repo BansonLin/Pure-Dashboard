@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import { getAllPeople, tenureYears } from "@/lib/mock/org-data";
-import { BU_MAP } from "@/lib/mock/bu-data";
+import { tenureYearsFrom } from "@/lib/report-date";
+import type { PersonView } from "@/lib/data";
 import type { EmploymentStatus } from "@/lib/types";
 
 const STATUS_LABEL: Record<EmploymentStatus, string> = {
@@ -17,8 +17,7 @@ const STATUS_STYLE: Record<EmploymentStatus, string> = {
   "cross-functional": "bg-warning/15 text-warning",
 };
 
-export function PeopleTable() {
-  const people = getAllPeople();
+export function PeopleTable({ rows }: { rows: PersonView[] }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[640px] text-sm">
@@ -32,11 +31,10 @@ export function PeopleTable() {
           </tr>
         </thead>
         <tbody>
-          {people.map((p) => {
-            const tenure = tenureYears(p.joinedAt);
-            const buName = p.buId ? BU_MAP[p.buId]?.name : null;
-            const crossBuNames =
-              p.crossBuIds?.map((id) => BU_MAP[id]?.name).filter(Boolean) ?? [];
+          {rows.map((p) => {
+            const tenure = p.joinedAt ? tenureYearsFrom(p.joinedAt) : null;
+            const buName = p.buName ?? null;
+            const crossBuNames = p.crossBuNames;
             return (
               <tr
                 key={p.id}

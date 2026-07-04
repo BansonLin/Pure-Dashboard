@@ -12,9 +12,9 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BUSINESS_UNITS } from "@/lib/mock/bu-data";
+import { buColor } from "@/lib/ui/chart-colors";
 import { useDashboardStore } from "@/store/dashboard-store";
-import { getRiskCounts } from "@/lib/mock/risk-data";
+import type { BuSeries } from "@/lib/data";
 
 const PRIMARY_NAV = [
   { href: "/", label: "集團總覽", icon: LayoutDashboard },
@@ -23,11 +23,16 @@ const PRIMARY_NAV = [
   { href: "/risk", label: "風險預警", icon: AlertTriangle, badgeKey: "risk" as const },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  bus: BuSeries[];
+  riskTotal: number;
+  riskCritical: number;
+}
+
+export function Sidebar({ bus, riskTotal, riskCritical }: SidebarProps) {
   const pathname = usePathname();
   const sidebarOpen = useDashboardStore((s) => s.sidebarOpen);
   const setSidebarOpen = useDashboardStore((s) => s.setSidebarOpen);
-  const riskCounts = getRiskCounts();
 
   // Escape 關閉行動版抽屜
   React.useEffect(() => {
@@ -75,10 +80,10 @@ export function Sidebar() {
                 active={active}
                 onClick={() => setSidebarOpen(false)}
                 badge={
-                  item.badgeKey === "risk" && riskCounts.total > 0
+                  item.badgeKey === "risk" && riskTotal > 0
                     ? {
-                        text: String(riskCounts.total),
-                        tone: riskCounts.critical > 0 ? "danger" : "warning",
+                        text: String(riskTotal),
+                        tone: riskCritical > 0 ? "danger" : "warning",
                       }
                     : undefined
                 }
@@ -90,7 +95,7 @@ export function Sidebar() {
         </NavSection>
 
         <NavSection label="事業體">
-          {BUSINESS_UNITS.map((bu) => {
+          {bus.map((bu) => {
             const active = pathname === `/bu/${bu.id}`;
             return (
               <NavLink
@@ -98,7 +103,7 @@ export function Sidebar() {
                 href={`/bu/${bu.id}`}
                 icon={Building2}
                 active={active}
-                accentHex={bu.accentHex}
+                accentHex={buColor(bu.id)}
                 onClick={() => setSidebarOpen(false)}
               >
                 {bu.name}

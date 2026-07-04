@@ -11,11 +11,12 @@ import {
   Legend,
   ReferenceLine,
 } from "recharts";
-import { MATERIAL_INDEX, MATERIAL_COLORS } from "@/lib/mock/finance-data";
+import { MATERIAL_COLORS } from "@/lib/ui/chart-colors";
+import type { MaterialIndexPoint } from "@/lib/types";
 
-export function MaterialsCostChart() {
-  const materials = Object.keys(MATERIAL_INDEX[0].values);
-  const data = MATERIAL_INDEX.map((m) => ({
+export function MaterialsCostChart({ points }: { points: MaterialIndexPoint[] }) {
+  const materials = points.length ? Object.keys(points[0].values) : [];
+  const data = points.map((m) => ({
     label: m.label,
     ...m.values,
   }));

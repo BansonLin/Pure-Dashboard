@@ -35,8 +35,6 @@ export interface BusinessUnit {
   statusReason: string[];
   /** 一句話現況描述 */
   note?: string;
-  /** 主視覺色 - tailwind hue token，用於圖表辨識 */
-  accentHex: string;
 }
 
 export interface MonthlyRevenuePoint {

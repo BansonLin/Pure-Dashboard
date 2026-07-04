@@ -1,4 +1,4 @@
-import type { RiskSeverity, StatusLevel } from "@/lib/types";
+import type { RiskCategory, RiskSeverity, StatusLevel } from "@/lib/types";
 
 /**
  * 全站唯一的 嚴重度 → 標籤/色彩 對照。
@@ -65,4 +65,13 @@ export const STATUS_META: Record<
     bg: "bg-danger/10",
     bar: "bg-danger",
   },
+};
+
+/** 風險分類顯示名稱 */
+export const RISK_CATEGORY_LABEL: Record<RiskCategory, string> = {
+  people: "人事",
+  finance: "財務",
+  operation: "營運",
+  market: "市場",
+  compliance: "法遵",
 };

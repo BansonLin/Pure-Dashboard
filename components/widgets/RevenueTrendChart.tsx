@@ -11,12 +11,16 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { BUSINESS_UNITS } from "@/lib/mock/bu-data";
-import { getRevenueChartData } from "@/lib/mock/revenue-data";
 import { formatTwd } from "@/lib/utils";
+import { buColor } from "@/lib/ui/chart-colors";
+import type { BuSeries } from "@/lib/data";
 
-export function RevenueTrendChart() {
-  const data = getRevenueChartData();
+interface RevenueTrendChartProps {
+  data: Array<Record<string, number | string>>;
+  series: BuSeries[];
+}
+
+export function RevenueTrendChart({ data, series }: RevenueTrendChartProps) {
   return (
     <div
       className="h-[320px] w-full"
@@ -26,7 +30,7 @@ export function RevenueTrendChart() {
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
           <defs>
-            {BUSINESS_UNITS.map((bu) => (
+            {series.map((bu) => (
               <linearGradient
                 key={bu.id}
                 id={`grad-${bu.id}`}
@@ -35,8 +39,8 @@ export function RevenueTrendChart() {
                 x2="0"
                 y2="1"
               >
-                <stop offset="0%" stopColor={bu.accentHex} stopOpacity={0.4} />
-                <stop offset="100%" stopColor={bu.accentHex} stopOpacity={0} />
+                <stop offset="0%" stopColor={buColor(bu.id)} stopOpacity={0.4} />
+                <stop offset="100%" stopColor={buColor(bu.id)} stopOpacity={0} />
               </linearGradient>
             ))}
           </defs>
@@ -65,14 +69,14 @@ export function RevenueTrendChart() {
             iconType="circle"
             wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
           />
-          {BUSINESS_UNITS.map((bu) => (
+          {series.map((bu) => (
             <Area
               key={bu.id}
               type="monotone"
               dataKey={bu.id}
               name={bu.name}
               stackId="1"
-              stroke={bu.accentHex}
+              stroke={buColor(bu.id)}
               strokeWidth={1.5}
               fill={`url(#grad-${bu.id})`}
             />

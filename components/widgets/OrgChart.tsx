@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { OrgNode } from "@/lib/mock/org-data";
-import { buildOrgTree } from "@/lib/mock/org-data";
+import type { OrgNode } from "@/lib/data";
 
 const FLAG_LABEL: Record<NonNullable<OrgNode["flag"]>, string> = {
   acting: "暫代未轉正",
@@ -27,8 +26,7 @@ const FLAG_DOT: Record<NonNullable<OrgNode["flag"]>, string> = {
   overloaded: "bg-danger",
 };
 
-export function OrgChart() {
-  const tree = buildOrgTree();
+export function OrgChart({ tree }: { tree: OrgNode }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">

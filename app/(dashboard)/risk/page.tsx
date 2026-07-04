@@ -5,14 +5,17 @@ import { RiskMatrix } from "@/components/widgets/RiskMatrix";
 import { RiskList } from "@/components/widgets/RiskList";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { getUnresolvedRisks, getRiskCounts } from "@/lib/mock/risk-data";
+import { fetchRiskCounts, fetchUnresolvedRisks } from "@/lib/data";
 import { isOverdue } from "@/lib/report-date";
 
 export const metadata = { title: "風險預警" };
 
-export default function RiskPage() {
-  const risks = getUnresolvedRisks();
-  const counts = getRiskCounts();
+export default async function RiskPage() {
+  const [risks, counts] = await Promise.all([
+    fetchUnresolvedRisks(),
+    fetchRiskCounts(),
+  ]);
+
   const highImpact = risks.filter((r) => r.impact >= 4).length;
   const overdue = risks.filter((r) => r.dueAt && isOverdue(r.dueAt)).length;
 
@@ -78,7 +81,7 @@ export default function RiskPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <RiskList />
+            <RiskList risks={risks} />
           </CardContent>
         </Card>
       </main>

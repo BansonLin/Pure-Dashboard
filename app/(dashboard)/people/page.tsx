@@ -6,25 +6,35 @@ import { PeopleTable } from "@/components/widgets/PeopleTable";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
-  ORG_STRUCTURE,
-  getTotalHeadcount,
-  getAtRiskPeople,
-  getGmSpanOfControl,
-} from "@/lib/mock/org-data";
+  fetchAtRiskPeople,
+  fetchGmSpanOfControl,
+  fetchHeadcount,
+  fetchOrgStructure,
+  fetchOrgTree,
+  fetchPeopleRows,
+} from "@/lib/data";
 
 export const metadata = { title: "人力組織" };
 
-export default function PeoplePage() {
-  const headcount = getTotalHeadcount();
-  const atRisk = getAtRiskPeople();
-  const span = getGmSpanOfControl();
+export default async function PeoplePage() {
+  const [org, orgTree, headcount, atRisk, span, peopleRows] =
+    await Promise.all([
+      fetchOrgStructure(),
+      fetchOrgTree(),
+      fetchHeadcount(),
+      fetchAtRiskPeople(),
+      fetchGmSpanOfControl(),
+      fetchPeopleRows(),
+    ]);
 
-  const vacantSeats = ORG_STRUCTURE.departments.reduce(
+  const vacantSeats = org.departments.reduce(
     (s, d) => s + Math.max(0, d.headcountTarget - d.headcountActual),
     0,
   );
   const actingCount = atRisk.filter((p) => p.status === "acting").length;
-  const crossCount = atRisk.filter((p) => p.status === "cross-functional").length;
+  const crossCount = atRisk.filter(
+    (p) => p.status === "cross-functional",
+  ).length;
 
   return (
     <>
@@ -39,8 +49,7 @@ export default function PeoplePage() {
             <AlertOctagon className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="text-sm">
               <p className="font-semibold">
-                管理幅度警示：總經理 {ORG_STRUCTURE.gm.name} 直管 {span.span}{" "}
-                個部門，超出建議上限 {span.threshold}
+                管理幅度警示：總經理 {org.gm.name} 直管 {span.span} 個部門，超出建議上限 {span.threshold}
               </p>
               <p className="mt-0.5 text-xs opacity-80">
                 建議拆出「行銷企劃部」與「行政財會部」由獨立 COO 統籌，或設立部門長層級。
@@ -54,7 +63,7 @@ export default function PeoplePage() {
           <KpiCard
             label="實際 / 編制"
             value={`${headcount.actual} / ${headcount.target}`}
-            hint={`缺額 ${vacantSeats} 個`}
+            hint={`缺額 ${vacantSeats} 個 · 總部＋設計體系`}
             icon={Users}
             accent={vacantSeats > 3 ? "danger" : vacantSeats > 0 ? "warning" : "success"}
           />
@@ -86,11 +95,13 @@ export default function PeoplePage() {
           <CardHeader>
             <CardTitle>組織架構圖</CardTitle>
             <CardDescription>
-              紅框 = 空缺 / 過載；黃框 = 暫代 / 兼職
+              紅框 = 空缺 / 過載；黃框 = 暫代 / 兼職。
+              本圖涵蓋集團總部與設計體系四部門；好室 / Wayhome / Homatch
+              人員直屬各事業體（見各 BU 詳情頁）。
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <OrgChart />
+            <OrgChart tree={orgTree} />
           </CardContent>
         </Card>
 
@@ -103,7 +114,7 @@ export default function PeoplePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {ORG_STRUCTURE.departments.map((d) => {
+            {org.departments.map((d) => {
               const ratio =
                 d.headcountTarget > 0
                   ? d.headcountActual / d.headcountTarget
@@ -152,7 +163,7 @@ export default function PeoplePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <PeopleTable />
+            <PeopleTable rows={peopleRows} />
           </CardContent>
         </Card>
       </main>

@@ -8,30 +8,32 @@ import { MaterialsCostChart } from "@/components/widgets/MaterialsCostChart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
-  CASH_FLOW,
-  AR_AGING,
-  AP_AGING,
-  MATERIAL_INDEX,
-  getGroupMonthlyPnl,
-  getGroupYtdPnl,
-} from "@/lib/mock/finance-data";
+  fetchApAging,
+  fetchArAging,
+  fetchCashFlow,
+  fetchGroupMonthlyPnl,
+  fetchGroupYtdPnl,
+  fetchMaterialIndex,
+} from "@/lib/data";
 import { formatTwd, formatPercent } from "@/lib/utils";
 
 export const metadata = { title: "財務" };
 
-export default function FinancePage() {
-  const monthlyPnl = getGroupMonthlyPnl();
-  const ytd = getGroupYtdPnl();
-  const closingCash = CASH_FLOW[CASH_FLOW.length - 1].amount;
-  const openingCash = CASH_FLOW[0].amount;
-  const cashDelta = closingCash - openingCash;
+export default async function FinancePage() {
+  const [monthlyPnl, ytd, cashFlow, arAging, apAging, materials] =
+    await Promise.all([
+      fetchGroupMonthlyPnl(),
+      fetchGroupYtdPnl(),
+      fetchCashFlow(),
+      fetchArAging(),
+      fetchApAging(),
+      fetchMaterialIndex(),
+    ]);
 
-  const arTotal = AR_AGING.reduce((s, b) => s + b.amount, 0);
-  const apTotal = AP_AGING.reduce((s, b) => s + b.amount, 0);
-
-  // 5 月鋁料指數
-  const lastMaterial = MATERIAL_INDEX[MATERIAL_INDEX.length - 1].values;
-  const aluminumDelta = lastMaterial["鋁料"] - 100;
+  const cashDelta = cashFlow.closing - cashFlow.opening;
+  const arTotal = arAging.reduce((s, b) => s + b.amount, 0);
+  const apTotal = apAging.reduce((s, b) => s + b.amount, 0);
+  const aluminumIndex = materials.latest["鋁料"];
 
   return (
     <>
@@ -59,17 +61,17 @@ export default function FinancePage() {
           />
           <KpiCard
             label="期末現金部位"
-            value={formatTwd(closingCash)}
+            value={formatTwd(cashFlow.closing)}
             hint={`較年初 ${cashDelta >= 0 ? "+" : ""}${formatTwd(cashDelta)}`}
-            delta={`${cashDelta >= 0 ? "+" : ""}${formatPercent(cashDelta / openingCash, 1)} YTD`}
+            delta={`${cashDelta >= 0 ? "+" : ""}${formatPercent(cashDelta / cashFlow.opening, 1)} YTD`}
             trend={cashDelta >= 0 ? "up" : "down"}
             icon={Wallet}
           />
           <KpiCard
             label="鋁料價格指數"
-            value={`${lastMaterial["鋁料"]}`}
-            hint="2025/12 = 100，已 +40%"
-            delta={`+${aluminumDelta}`}
+            value={`${aluminumIndex}`}
+            hint={`2025/12 = 100，已 +${aluminumIndex - 100}%`}
+            delta={`+${aluminumIndex - 100}`}
             trend="up"
             icon={TrendingUp}
             accent="danger"
@@ -96,8 +98,8 @@ export default function FinancePage() {
               <div>
                 <CardTitle>YTD 現金流瀑布</CardTitle>
                 <CardDescription>
-                  自 1/1 期初 {formatTwd(openingCash)} 到 5/31 期末{" "}
-                  {formatTwd(closingCash)}
+                  自 1/1 期初 {formatTwd(cashFlow.opening)} 到 5/31 期末{" "}
+                  {formatTwd(cashFlow.closing)}
                 </CardDescription>
               </div>
               <div className="flex gap-4 text-xs">
@@ -108,7 +110,7 @@ export default function FinancePage() {
             </div>
           </CardHeader>
           <CardContent>
-            <CashFlowWaterfall data={CASH_FLOW} />
+            <CashFlowWaterfall data={cashFlow.nodes} />
           </CardContent>
         </Card>
 
@@ -116,12 +118,12 @@ export default function FinancePage() {
         <section className="grid gap-6 lg:grid-cols-2">
           <AgingTable
             title={`應收帳款 Aging · 合計 ${formatTwd(arTotal)}`}
-            buckets={AR_AGING}
+            buckets={arAging}
             tone="receivable"
           />
           <AgingTable
             title={`應付帳款 Aging · 合計 ${formatTwd(apTotal)}`}
-            buckets={AP_AGING}
+            buckets={apAging}
             tone="payable"
           />
         </section>
@@ -135,7 +137,7 @@ export default function FinancePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <MaterialsCostChart />
+            <MaterialsCostChart points={materials.points} />
           </CardContent>
         </Card>
       </main>

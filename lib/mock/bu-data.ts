@@ -27,7 +27,6 @@ const RAW_BUSINESS_UNITS: Array<Omit<BusinessUnit, "activeProjects">> = [
       "主管職由許舒婷暫代逾三個月仍未轉正、指揮鏈不穩。",
     ],
     note: "5 月簽約量回穩，但設計師人均負載已達警戒。",
-    accentHex: "#0d9488", // teal-600
   },
   {
     id: "design-xinyi",
@@ -47,7 +46,6 @@ const RAW_BUSINESS_UNITS: Array<Omit<BusinessUnit, "activeProjects">> = [
       "行銷部完全空缺，信義店無在地曝光策略、新案進線量持續下滑。",
     ],
     note: "人力與目標落差大，行銷曝光不足，需重新評估策略。",
-    accentHex: "#d97706", // amber-600
   },
   {
     id: "pure-house",
@@ -66,7 +64,6 @@ const RAW_BUSINESS_UNITS: Array<Omit<BusinessUnit, "activeProjects">> = [
       "工務排程已排到 8 月、現金流穩健。",
     ],
     note: "輕裝修需求穩定，建議鎖定北宜兩地小坪數市場。",
-    accentHex: "#6366f1", // indigo-500
   },
   {
     id: "pu-yu",
@@ -85,7 +82,6 @@ const RAW_BUSINESS_UNITS: Array<Omit<BusinessUnit, "activeProjects">> = [
       "目前 4 個專案皆為延續案、結案後將出現空窗期。",
     ],
     note: "行銷部完全空缺，目前由總管理處兼辦，急需建編。",
-    accentHex: "#ef4444", // red-500
   },
   {
     id: "wayhome",
@@ -104,7 +100,6 @@ const RAW_BUSINESS_UNITS: Array<Omit<BusinessUnit, "activeProjects">> = [
       "信義店非直營暫不計入合併營收。",
     ],
     note: "宜蘭門市表現穩定；信義門市非直營暫不計入。",
-    accentHex: "#10b981", // emerald-500
   },
   {
     id: "homatch",
@@ -123,7 +118,6 @@ const RAW_BUSINESS_UNITS: Array<Omit<BusinessUnit, "activeProjects">> = [
       "目前僅 2 人運營、行銷端外包品質不穩定。",
     ],
     note: "5 月轉換率下滑，需檢視主力 SKU 的商品頁與廣告組合。",
-    accentHex: "#8b5cf6", // violet-500
   },
 ];
 

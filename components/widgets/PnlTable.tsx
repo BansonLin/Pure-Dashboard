@@ -1,6 +1,6 @@
 import { cn, formatTwd, formatPercent } from "@/lib/utils";
 import type { PnlRow } from "@/lib/types";
-import { derivePnl } from "@/lib/mock/finance-data";
+import { derivePnl } from "@/lib/pnl";
 
 interface PnlTableProps {
   rows: PnlRow[];

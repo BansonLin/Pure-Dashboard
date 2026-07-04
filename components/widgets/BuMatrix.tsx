@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { BUSINESS_UNITS } from "@/lib/mock/bu-data";
 import { formatTwd } from "@/lib/utils";
+import { buColor } from "@/lib/ui/chart-colors";
+import type { BusinessUnit } from "@/lib/types";
 import { RevenueProgressBar } from "./RevenueProgressBar";
 import { StatusBadge } from "./StatusBadge";
 
@@ -13,10 +14,10 @@ const CATEGORY_LABEL: Record<string, string> = {
   ecommerce: "電商",
 };
 
-export function BuMatrix() {
+export function BuMatrix({ bus }: { bus: BusinessUnit[] }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {BUSINESS_UNITS.map((bu) => {
+      {bus.map((bu) => {
         return (
           <Link
             key={bu.id}
@@ -25,7 +26,7 @@ export function BuMatrix() {
           >
             <span
               className="absolute left-0 top-0 h-full w-0.5 rounded-l-xl opacity-70"
-              style={{ backgroundColor: bu.accentHex }}
+              style={{ backgroundColor: buColor(bu.id) }}
             />
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 space-y-1">

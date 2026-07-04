@@ -168,11 +168,3 @@ export function getRisksByCategory(category: RiskCategory | "all") {
 export function getRisksByBu(buId: string) {
   return getUnresolvedRisks().filter((r) => r.buId === buId);
 }
-
-export const RISK_CATEGORY_LABEL: Record<RiskCategory, string> = {
-  people: "人事",
-  finance: "財務",
-  operation: "營運",
-  market: "市場",
-  compliance: "法遵",
-};

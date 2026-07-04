@@ -8,25 +8,31 @@ import { RevenueProgressBar } from "@/components/widgets/RevenueProgressBar";
 import { ActionList } from "@/components/widgets/ActionList";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-import { BUSINESS_UNITS, getBu } from "@/lib/mock/bu-data";
-import { getGroupMonthlyRevenue, MONTHLY_REVENUE } from "@/lib/mock/revenue-data";
-import { getRiskCounts } from "@/lib/mock/risk-data";
+import {
+  fetchBusinessUnits,
+  fetchBuSeries,
+  fetchGroupRevenueSummary,
+  fetchRevenueChartData,
+  fetchRiskCounts,
+  fetchTopActions,
+} from "@/lib/data";
 import { formatTwd, formatPercent } from "@/lib/utils";
 
-export default function GroupOverviewPage() {
-  const groupMonthly = getGroupMonthlyRevenue();
-  const yilan = getBu("design-yilan")!;
-  const xinyi = getBu("design-xinyi")!;
-  const riskCounts = getRiskCounts();
+export default async function GroupOverviewPage() {
+  const [bus, series, revenue, chartData, riskCounts, topActions] =
+    await Promise.all([
+      fetchBusinessUnits(),
+      fetchBuSeries(),
+      fetchGroupRevenueSummary(),
+      fetchRevenueChartData(),
+      fetchRiskCounts(),
+      fetchTopActions(5),
+    ]);
 
-  const totalActiveProjects = BUSINESS_UNITS.reduce(
-    (s, b) => s + b.activeProjects,
-    0,
-  );
-
-  const prevMonth = MONTHLY_REVENUE[MONTHLY_REVENUE.length - 2];
-  const momPrev = Object.values(prevMonth.values).reduce((s, v) => s + v, 0);
-  const momPct = momPrev > 0 ? ((groupMonthly - momPrev) / momPrev) * 100 : 0;
+  const yilan = bus.find((b) => b.id === "design-yilan")!;
+  const xinyi = bus.find((b) => b.id === "design-xinyi")!;
+  const totalActiveProjects = bus.reduce((s, b) => s + b.activeProjects, 0);
+  const momPct = revenue.momRatio * 100;
 
   return (
     <>
@@ -48,8 +54,8 @@ export default function GroupOverviewPage() {
         >
           <KpiCard
             label="集團當月營收"
-            value={formatTwd(groupMonthly)}
-            hint="2026 年 5 月"
+            value={formatTwd(revenue.currentMonth)}
+            hint={revenue.monthLabel}
             delta={`${momPct >= 0 ? "+" : ""}${momPct.toFixed(1)}% MoM`}
             trend={momPct >= 0 ? "up" : "down"}
             icon={Activity}
@@ -104,7 +110,7 @@ export default function GroupOverviewPage() {
             title="六大事業體"
             description="點擊卡片可進入該事業體詳情頁"
           />
-          <BuMatrix />
+          <BuMatrix bus={bus} />
         </section>
 
         {/* Trend + Actions */}
@@ -124,7 +130,7 @@ export default function GroupOverviewPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <RevenueTrendChart />
+              <RevenueTrendChart data={chartData} series={series} />
             </CardContent>
           </Card>
 
@@ -134,7 +140,7 @@ export default function GroupOverviewPage() {
               <CardDescription>依風險嚴重度排序</CardDescription>
             </CardHeader>
             <CardContent>
-              <ActionList limit={5} />
+              <ActionList actions={topActions} />
             </CardContent>
           </Card>
         </section>

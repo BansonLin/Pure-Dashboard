@@ -9,25 +9,31 @@ import { ProjectList } from "@/components/widgets/ProjectList";
 import { ActionList } from "@/components/widgets/ActionList";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-import { BUSINESS_UNITS, getBu } from "@/lib/mock/bu-data";
-import { getBuMonthlyPnl } from "@/lib/mock/finance-data";
-import { getProjectsByBu } from "@/lib/mock/project-data";
-import { ORG_STRUCTURE, tenureYears } from "@/lib/mock/org-data";
-import { getRisksByBu } from "@/lib/mock/risk-data";
+import {
+  fetchBu,
+  fetchBuMonthlyPnl,
+  fetchBuPeople,
+  fetchBusinessUnits,
+  fetchProjectsByBu,
+  fetchRisksByBu,
+} from "@/lib/data";
+import { tenureYearsFrom } from "@/lib/report-date";
 import { formatTwd, formatPercent, cn } from "@/lib/utils";
 import { STATUS_META } from "@/lib/ui/severity";
+import { buColor } from "@/lib/ui/chart-colors";
 import type { StatusLevel } from "@/lib/types";
 
 interface PageProps {
   params: { buId: string };
 }
 
-export function generateStaticParams() {
-  return BUSINESS_UNITS.map((b) => ({ buId: b.id }));
+export async function generateStaticParams() {
+  const bus = await fetchBusinessUnits();
+  return bus.map((b) => ({ buId: b.id }));
 }
 
-export function generateMetadata({ params }: PageProps) {
-  const bu = getBu(params.buId);
+export async function generateMetadata({ params }: PageProps) {
+  const bu = await fetchBu(params.buId);
   return { title: bu ? bu.name : "事業體" };
 }
 
@@ -58,23 +64,23 @@ const STATUS_TONE: Record<
   },
 };
 
-export default function BuDetailPage({ params }: PageProps) {
-  const bu = getBu(params.buId);
+export default async function BuDetailPage({ params }: PageProps) {
+  const bu = await fetchBu(params.buId);
   if (!bu) return notFound();
 
+  const [pnl, projects, buRisks, involvedPeople] = await Promise.all([
+    fetchBuMonthlyPnl(bu.id),
+    fetchProjectsByBu(bu.id),
+    fetchRisksByBu(bu.id),
+    fetchBuPeople(bu.id),
+  ]);
+
   const progress = bu.annualTarget > 0 ? bu.ytdRevenue / bu.annualTarget : 0;
-  const pnl = getBuMonthlyPnl(bu.id);
-  const projects = getProjectsByBu(bu.id);
-  const buRisks = getRisksByBu(bu.id);
-
-  // 該 BU 涉及的人員：主要 buId 或 cross buId
-  const involvedPeople = collectInvolvedPeople(bu.id);
-  // 跨部門支援：主要編制不在本 BU、以 crossBuIds 兼職支援者
   const crossSupportCount = involvedPeople.filter(
-    (p) => p.buId !== bu.id && (p.crossBuIds as readonly string[] | undefined)?.includes(bu.id),
+    (p) =>
+      p.buId !== bu.id &&
+      (p.crossBuIds as readonly string[] | undefined)?.includes(bu.id),
   ).length;
-
-  // 該 BU 進行中合約金額
   const totalContractAmount = projects.reduce(
     (s, p) => s + p.contractAmount * (1 - p.progress / 100),
     0,
@@ -95,7 +101,7 @@ export default function BuDetailPage({ params }: PageProps) {
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: bu.accentHex }}
+                  style={{ backgroundColor: buColor(bu.id) }}
                 />
                 <h2 className="text-xl font-semibold tracking-tight">{bu.name}</h2>
                 <StatusBadge level={bu.status} pulse={bu.status !== "green"} />
@@ -185,7 +191,7 @@ export default function BuDetailPage({ params }: PageProps) {
           </CardContent>
         </Card>
 
-        {/* Projects + People + Risks */}
+        {/* Projects + People */}
         <section className="grid gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardHeader>
@@ -220,7 +226,7 @@ export default function BuDetailPage({ params }: PageProps) {
               ) : (
                 <ul className="space-y-2.5">
                   {involvedPeople.map((p) => {
-                    const tenure = tenureYears(p.joinedAt);
+                    const tenure = p.joinedAt ? tenureYearsFrom(p.joinedAt) : null;
                     const personTone =
                       p.status === "acting" || p.status === "cross-functional"
                         ? "border-warning/40 bg-warning/5"
@@ -288,8 +294,8 @@ export default function BuDetailPage({ params }: PageProps) {
                   owner: r.owner,
                   buId: r.buId,
                   dueAt: r.dueAt,
+                  buName: r.buName,
                 }))}
-                limit={buRisks.length}
               />
             </CardContent>
           </Card>
@@ -308,23 +314,4 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="text-base font-semibold tabular-nums">{value}</p>
     </div>
   );
-}
-
-function collectInvolvedPeople(buId: string) {
-  const out: Array<(typeof ORG_STRUCTURE.departments)[number]["members"][number]> = [];
-  for (const dept of ORG_STRUCTURE.departments) {
-    if (dept.head) {
-      const cross = (dept.head.crossBuIds ?? []) as readonly string[];
-      if (dept.head.buId === buId || cross.includes(buId)) {
-        out.push(dept.head);
-      }
-    }
-    for (const m of dept.members) {
-      const cross = (m.crossBuIds ?? []) as readonly string[];
-      if (m.buId === buId || cross.includes(buId)) {
-        out.push(m);
-      }
-    }
-  }
-  return out;
 }
