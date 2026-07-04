@@ -88,28 +88,40 @@ export function getGroupYtdPnl() {
 /**
  * 集團 2026 年 YTD 現金流瀑布
  * 起：1/1 期初現金；終：5/31 期末現金
- * 期末現金由前面節點累加而成，避免手動寫死失準。
+ * 收現與各項支出一律由合併損益推導，確保與財務頁損益表口徑一致：
+ * - 營業收現 = YTD 營收 × 收現率（其餘掛應收）
+ * - 材料/工資 = YTD 直接成本
+ * - 薪資/租金/行銷/稅利息 = YTD 營業費用按固定比例拆分
  */
 const CASH_FLOW_OPENING = 32_000_000;
-const CASH_FLOW_DELTAS: Array<Omit<CashFlowNode, "type"> & { type: "in" | "out" }> = [
-  { label: "營業收入", amount: 91_300_000, type: "in" },
-  { label: "材料 / 工資", amount: -55_400_000, type: "out" },
-  { label: "薪資費用", amount: -14_200_000, type: "out" },
-  { label: "辦公 / 租金", amount: -3_800_000, type: "out" },
-  { label: "行銷支出", amount: -2_400_000, type: "out" },
-  { label: "稅 / 利息", amount: -1_900_000, type: "out" },
-  { label: "資本支出", amount: -4_500_000, type: "out" },
-];
+const COLLECTION_RATE = 0.93;           // 收現率：7% 掛在應收帳款
+const OPEX_SPLIT = { 薪資費用: 0.62, "辦公 / 租金": 0.17, 行銷支出: 0.11, "稅 / 利息": 0.10 };
+const CAPEX = 4_500_000;
 
-export const CASH_FLOW: CashFlowNode[] = [
-  { label: "期初現金", amount: CASH_FLOW_OPENING, type: "total" },
-  ...CASH_FLOW_DELTAS,
-  {
-    label: "期末現金",
-    amount: CASH_FLOW_DELTAS.reduce((s, n) => s + n.amount, CASH_FLOW_OPENING),
-    type: "total",
-  },
-];
+function buildCashFlow(): CashFlowNode[] {
+  const ytd = getGroupYtdPnl();
+  const deltas: CashFlowNode[] = [
+    { label: "營業收現", amount: Math.round(ytd.revenue * COLLECTION_RATE), type: "in" },
+    { label: "材料 / 工資", amount: -ytd.cost, type: "out" },
+    ...Object.entries(OPEX_SPLIT).map(([label, ratio]) => ({
+      label,
+      amount: -Math.round(ytd.opex * ratio),
+      type: "out" as const,
+    })),
+    { label: "資本支出", amount: -CAPEX, type: "out" },
+  ];
+  return [
+    { label: "期初現金", amount: CASH_FLOW_OPENING, type: "total" },
+    ...deltas,
+    {
+      label: "期末現金",
+      amount: deltas.reduce((s, n) => s + n.amount, CASH_FLOW_OPENING),
+      type: "total",
+    },
+  ];
+}
+
+export const CASH_FLOW: CashFlowNode[] = buildCashFlow();
 
 /** 應收帳款 Aging（5/31 餘額，單位：元） */
 export const AR_AGING: AgingBucket[] = [

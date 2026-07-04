@@ -29,8 +29,7 @@ export function formatNumber(n: number) {
   return n.toLocaleString("zh-TW");
 }
 
-/** Format ratio 0–1 (or 0–100 if >1) as percent string. */
+/** Format a 0–1 ratio as percent string（超過 1 = 超過 100%，照實顯示）. */
 export function formatPercent(value: number, digits = 1) {
-  const pct = value > 1 ? value : value * 100;
-  return `${pct.toFixed(digits)}%`;
+  return `${(value * 100).toFixed(digits)}%`;
 }

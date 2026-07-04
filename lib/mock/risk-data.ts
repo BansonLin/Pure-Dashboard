@@ -1,4 +1,5 @@
 import type { RiskItem, ActionItem, RiskCategory } from "@/lib/types";
+import { SEVERITY_META } from "@/lib/ui/severity";
 
 export const RISK_ITEMS: RiskItem[] = [
   {
@@ -143,18 +144,11 @@ export function getRiskCounts() {
   };
 }
 
-const SEVERITY_RANK: Record<RiskItem["severity"], number> = {
-  critical: 0,
-  high: 1,
-  medium: 2,
-  low: 3,
-};
-
 /** Top N 行動清單，依嚴重度排序 */
 export function getTopActions(limit = 5): ActionItem[] {
   return getUnresolvedRisks()
     .slice()
-    .sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity])
+    .sort((a, b) => SEVERITY_META[a.severity].rank - SEVERITY_META[b.severity].rank)
     .slice(0, limit)
     .map((r) => ({
       id: r.id,

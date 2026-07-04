@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { STATUS_META } from "@/lib/ui/severity";
 import type { StatusLevel } from "@/lib/types";
 
 interface StatusBadgeProps {
@@ -9,32 +10,8 @@ interface StatusBadgeProps {
   pulse?: boolean;
 }
 
-const STATUS_MAP: Record<
-  StatusLevel,
-  { dot: string; bg: string; text: string; label: string }
-> = {
-  green: {
-    dot: "bg-success",
-    bg: "bg-success/10",
-    text: "text-success",
-    label: "正常",
-  },
-  amber: {
-    dot: "bg-warning",
-    bg: "bg-warning/10",
-    text: "text-warning",
-    label: "注意",
-  },
-  red: {
-    dot: "bg-danger",
-    bg: "bg-danger/10",
-    text: "text-danger",
-    label: "警示",
-  },
-};
-
 export function StatusBadge({ level, label, className, pulse = false }: StatusBadgeProps) {
-  const s = STATUS_MAP[level];
+  const s = STATUS_META[level];
   return (
     <span
       className={cn(

@@ -6,6 +6,7 @@ import { RiskList } from "@/components/widgets/RiskList";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { getUnresolvedRisks, getRiskCounts } from "@/lib/mock/risk-data";
+import { isOverdue } from "@/lib/report-date";
 
 export const metadata = { title: "風險預警" };
 
@@ -13,10 +14,7 @@ export default function RiskPage() {
   const risks = getUnresolvedRisks();
   const counts = getRiskCounts();
   const highImpact = risks.filter((r) => r.impact >= 4).length;
-  const overdue = risks.filter((r) => {
-    if (!r.dueAt) return false;
-    return new Date(r.dueAt).getTime() < new Date("2026-05-25").getTime();
-  }).length;
+  const overdue = risks.filter((r) => r.dueAt && isOverdue(r.dueAt)).length;
 
   return (
     <>

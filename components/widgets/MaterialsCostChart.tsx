@@ -21,7 +21,11 @@ export function MaterialsCostChart() {
   }));
 
   return (
-    <div className="h-[320px] w-full">
+    <div
+      className="h-[320px] w-full"
+      role="img"
+      aria-label="原物料價格指數趨勢線圖，2025 年 12 月為基準 100"
+    >
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
           <CartesianGrid

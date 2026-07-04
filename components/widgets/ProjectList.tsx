@@ -1,7 +1,6 @@
 import { Calendar, User } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
-import { zhTW } from "date-fns/locale";
 import { cn, formatTwd, formatPercent } from "@/lib/utils";
+import { daysUntil, formatMonthDay } from "@/lib/report-date";
 import type { Project } from "@/lib/types";
 
 interface ProjectListProps {
@@ -17,14 +16,10 @@ export function ProjectList({ projects }: ProjectListProps) {
     );
   }
 
-  // Reference today for delta calculation (matches TopBar mock today)
-  const today = new Date("2026-05-25T09:00:00+08:00");
-
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {projects.map((p) => {
-        const due = new Date(p.dueAt);
-        const daysLeft = differenceInDays(due, today);
+        const daysLeft = daysUntil(p.dueAt);
         const dueColor =
           daysLeft < 0
             ? "text-danger"
@@ -89,7 +84,7 @@ export function ProjectList({ projects }: ProjectListProps) {
               </span>
               <span className={cn("inline-flex items-center gap-1", dueColor)}>
                 <Calendar className="h-3 w-3" />
-                {format(due, "M/d", { locale: zhTW })}
+                {formatMonthDay(p.dueAt)}
                 {daysLeft >= 0
                   ? ` · 剩 ${daysLeft} 天`
                   : ` · 已逾期 ${-daysLeft} 天`}

@@ -15,6 +15,7 @@ import { getProjectsByBu } from "@/lib/mock/project-data";
 import { ORG_STRUCTURE, tenureYears } from "@/lib/mock/org-data";
 import { getRisksByBu } from "@/lib/mock/risk-data";
 import { formatTwd, formatPercent, cn } from "@/lib/utils";
+import { STATUS_META } from "@/lib/ui/severity";
 import type { StatusLevel } from "@/lib/types";
 
 interface PageProps {
@@ -68,6 +69,10 @@ export default function BuDetailPage({ params }: PageProps) {
 
   // 該 BU 涉及的人員：主要 buId 或 cross buId
   const involvedPeople = collectInvolvedPeople(bu.id);
+  // 跨部門支援：主要編制不在本 BU、以 crossBuIds 兼職支援者
+  const crossSupportCount = involvedPeople.filter(
+    (p) => p.buId !== bu.id && (p.crossBuIds as readonly string[] | undefined)?.includes(bu.id),
+  ).length;
 
   // 該 BU 進行中合約金額
   const totalContractAmount = projects.reduce(
@@ -119,13 +124,7 @@ export default function BuDetailPage({ params }: PageProps) {
               current={bu.ytdRevenue}
               target={bu.annualTarget}
               showLabel={false}
-              barClassName={
-                bu.status === "red"
-                  ? "bg-danger"
-                  : bu.status === "amber"
-                    ? "bg-warning"
-                    : "bg-success"
-              }
+              barClassName={STATUS_META[bu.status].bar}
             />
           </KpiCard>
           <KpiCard
@@ -137,7 +136,7 @@ export default function BuDetailPage({ params }: PageProps) {
           <KpiCard
             label="人力編制"
             value={`${bu.headcount} 人`}
-            hint={involvedPeople.length > bu.headcount ? `+${involvedPeople.length - bu.headcount} 跨部門支援` : "直接編制"}
+            hint={crossSupportCount > 0 ? `+${crossSupportCount} 人跨部門支援` : "直接編制"}
             icon={Users}
           />
           <KpiCard
@@ -165,11 +164,7 @@ export default function BuDetailPage({ params }: PageProps) {
                   <span
                     className={cn(
                       "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                      bu.status === "red"
-                        ? "bg-danger"
-                        : bu.status === "amber"
-                          ? "bg-warning"
-                          : "bg-success",
+                      STATUS_META[bu.status].dot,
                     )}
                   />
                   <span className="leading-relaxed">{r}</span>
@@ -205,7 +200,7 @@ export default function BuDetailPage({ params }: PageProps) {
               <ProjectList
                 projects={projects
                   .slice()
-                  .sort((a, b) => +new Date(a.dueAt) - +new Date(b.dueAt))}
+                  .sort((a, b) => a.dueAt.localeCompare(b.dueAt))}
               />
             </CardContent>
           </Card>

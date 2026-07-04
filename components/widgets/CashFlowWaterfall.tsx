@@ -74,7 +74,11 @@ const COLOR_BY_TYPE: Record<CashFlowNode["type"], string> = {
 export function CashFlowWaterfall({ data, className }: CashFlowWaterfallProps) {
   const bars = buildWaterfall(data);
   return (
-    <div className={className ?? "h-[360px] w-full"}>
+    <div
+      className={className ?? "h-[380px] w-full"}
+      role="img"
+      aria-label="YTD 現金流瀑布圖：期初現金經營業收現與各項支出後之期末現金"
+    >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={bars} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid
@@ -89,9 +93,9 @@ export function CashFlowWaterfall({ data, className }: CashFlowWaterfallProps) {
             tickLine={false}
             axisLine={false}
             interval={0}
-            angle={-15}
+            angle={-38}
             textAnchor="end"
-            height={60}
+            height={72}
           />
           <YAxis
             stroke="hsl(var(--muted-foreground))"

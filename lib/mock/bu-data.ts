@@ -1,11 +1,14 @@
 import type { BusinessUnit } from "@/lib/types";
+import { PROJECTS } from "./project-data";
 
 /**
  * 六大事業體 - 截至 2026/05 月底
  * 宜蘭目標 8,000 萬、進度約 32%
  * 信義目標 5,000 萬、進度約 30%
+ *
+ * activeProjects 一律由 project-data 推導，避免與 BU 詳情頁數字不一致。
  */
-export const BUSINESS_UNITS: BusinessUnit[] = [
+const RAW_BUSINESS_UNITS: Array<Omit<BusinessUnit, "activeProjects">> = [
   {
     id: "design-yilan",
     name: "璞石宜蘭",
@@ -15,17 +18,16 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     annualTarget: 80_000_000,
     ytdRevenue: 25_800_000,        // ~32.3%
     monthlyRevenue: 6_200_000,
-    activeProjects: 11,
     headcount: 12,
     status: "amber",
     statusReason: [
       "YTD 達成 32.3%、略低於線性目標 41.7%（5/12），落後但可追。",
       "5 月簽約量回穩，月營收 620 萬為近半年高點。",
-      "設計師人均負載已達 1.4 案/人，再接案將影響交付品質。",
+      "設計師人均負載已達 1.5 案/人，再接案將影響交付品質。",
       "主管職由許舒婷暫代逾三個月仍未轉正、指揮鏈不穩。",
     ],
     note: "5 月簽約量回穩，但設計師人均負載已達警戒。",
-    accentHex: "#0f766e", // teal-700
+    accentHex: "#0d9488", // teal-600
   },
   {
     id: "design-xinyi",
@@ -36,7 +38,6 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     annualTarget: 50_000_000,
     ytdRevenue: 15_100_000,        // ~30.2%
     monthlyRevenue: 3_400_000,
-    activeProjects: 6,
     headcount: 5,
     status: "red",
     statusReason: [
@@ -46,7 +47,7 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
       "行銷部完全空缺，信義店無在地曝光策略、新案進線量持續下滑。",
     ],
     note: "人力與目標落差大，行銷曝光不足，需重新評估策略。",
-    accentHex: "#b45309", // amber-700
+    accentHex: "#d97706", // amber-600
   },
   {
     id: "pure-house",
@@ -57,7 +58,6 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     annualTarget: 36_000_000,
     ytdRevenue: 13_800_000,        // ~38%
     monthlyRevenue: 3_100_000,
-    activeProjects: 18,
     headcount: 7,
     status: "green",
     statusReason: [
@@ -66,7 +66,7 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
       "工務排程已排到 8 月、現金流穩健。",
     ],
     note: "輕裝修需求穩定，建議鎖定北宜兩地小坪數市場。",
-    accentHex: "#4f46e5", // indigo-600
+    accentHex: "#6366f1", // indigo-500
   },
   {
     id: "pu-yu",
@@ -77,7 +77,6 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     annualTarget: 24_000_000,
     ytdRevenue: 7_900_000,         // ~33%
     monthlyRevenue: 1_650_000,
-    activeProjects: 4,
     headcount: 0,                  // 目前空編，由總管理處兼辦
     status: "red",
     statusReason: [
@@ -86,7 +85,7 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
       "目前 4 個專案皆為延續案、結案後將出現空窗期。",
     ],
     note: "行銷部完全空缺，目前由總管理處兼辦，急需建編。",
-    accentHex: "#dc2626", // red-600
+    accentHex: "#ef4444", // red-500
   },
   {
     id: "wayhome",
@@ -97,7 +96,6 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     annualTarget: 18_000_000,
     ytdRevenue: 6_600_000,         // ~37%
     monthlyRevenue: 1_420_000,
-    activeProjects: 1,
     headcount: 3,
     status: "green",
     statusReason: [
@@ -106,7 +104,7 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
       "信義店非直營暫不計入合併營收。",
     ],
     note: "宜蘭門市表現穩定；信義門市非直營暫不計入。",
-    accentHex: "#059669", // emerald-600
+    accentHex: "#10b981", // emerald-500
   },
   {
     id: "homatch",
@@ -117,7 +115,6 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
     annualTarget: 15_000_000,
     ytdRevenue: 4_200_000,         // ~28%
     monthlyRevenue: 980_000,
-    activeProjects: 0,
     headcount: 2,
     status: "amber",
     statusReason: [
@@ -126,9 +123,15 @@ export const BUSINESS_UNITS: BusinessUnit[] = [
       "目前僅 2 人運營、行銷端外包品質不穩定。",
     ],
     note: "5 月轉換率下滑，需檢視主力 SKU 的商品頁與廣告組合。",
-    accentHex: "#7c3aed", // violet-600
+    accentHex: "#8b5cf6", // violet-500
   },
 ];
+
+/** activeProjects 由 project-data 實際筆數推導，兩頁數字結構性一致 */
+export const BUSINESS_UNITS: BusinessUnit[] = RAW_BUSINESS_UNITS.map((b) => ({
+  ...b,
+  activeProjects: PROJECTS.filter((p) => p.buId === b.id).length,
+}));
 
 export const BU_MAP: Record<string, BusinessUnit> = Object.fromEntries(
   BUSINESS_UNITS.map((b) => [b.id, b]),

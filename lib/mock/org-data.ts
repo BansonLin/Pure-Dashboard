@@ -1,4 +1,5 @@
 import type { OrgStructure, Person } from "@/lib/types";
+import { tenureYearsFrom } from "@/lib/report-date";
 
 export const ORG_STRUCTURE: OrgStructure = {
   ceo: {
@@ -59,7 +60,7 @@ export const ORG_STRUCTURE: OrgStructure = {
           grade: 4, buId: "design-yilan",
         },
         {
-          id: "p-d5", name: "繪圖 / 行政（3 人）", title: "支援 ×3",
+          id: "p-d5", name: "繪圖 / 行政（4 人）", title: "支援 ×4",
           department: "設計部 - 宜蘭", status: "active",
           grade: 3, buId: "design-yilan",
         },
@@ -168,12 +169,10 @@ export function getAllPeople(): Person[] {
   return all;
 }
 
-/** 計算任職時長（年） */
-export function tenureYears(joinedAt: string | undefined, today = "2026-05-25"): number | null {
+/** 計算任職時長（年），以全站報表基準日為準 */
+export function tenureYears(joinedAt: string | undefined): number | null {
   if (!joinedAt) return null;
-  const t = new Date(today).getTime();
-  const j = new Date(joinedAt).getTime();
-  return Math.max(0, (t - j) / (365.25 * 24 * 60 * 60 * 1000));
+  return tenureYearsFrom(joinedAt);
 }
 
 /** 篩出有「異常狀態」的人員 */

@@ -29,6 +29,16 @@ export function Sidebar() {
   const setSidebarOpen = useDashboardStore((s) => s.setSidebarOpen);
   const riskCounts = getRiskCounts();
 
+  // Escape 關閉行動版抽屜
+  React.useEffect(() => {
+    if (!sidebarOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSidebarOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [sidebarOpen, setSidebarOpen]);
+
   const content = (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center gap-2 px-6">
@@ -125,8 +135,11 @@ export function Sidebar() {
         {content}
       </aside>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer — 關閉時以 inert + aria-hidden 移出 tab 順序與 AT tree */}
       <aside
+        aria-hidden={!sidebarOpen}
+        // @ts-expect-error React 18 尚未支援 inert prop，以空字串屬性寫入 DOM
+        inert={sidebarOpen ? undefined : ""}
         className={cn(
           "fixed inset-y-0 left-0 z-40 w-72 border-r border-border bg-card transition-transform lg:hidden",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",

@@ -15,13 +15,16 @@ import { BUSINESS_UNITS } from "@/lib/mock/bu-data";
 import { getRevenueChartData } from "@/lib/mock/revenue-data";
 import { formatTwd } from "@/lib/utils";
 
-const DATA = getRevenueChartData();
-
 export function RevenueTrendChart() {
+  const data = getRevenueChartData();
   return (
-    <div className="h-[320px] w-full">
+    <div
+      className="h-[320px] w-full"
+      role="img"
+      aria-label="2026 年 1 至 5 月各事業體月度營收堆疊面積圖"
+    >
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={DATA} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
           <defs>
             {BUSINESS_UNITS.map((bu) => (
               <linearGradient
