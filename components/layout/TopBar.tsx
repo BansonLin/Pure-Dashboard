@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, CalendarDays } from "lucide-react";
+import { Menu, CalendarDays, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useDashboardStore } from "@/store/dashboard-store";
@@ -43,6 +43,12 @@ export function TopBar({ title, description }: TopBarProps) {
       </div>
 
       <ThemeToggle />
+
+      <form action="/api/auth/logout" method="POST">
+        <Button variant="ghost" size="icon" aria-label="登出" type="submit">
+          <LogOut />
+        </Button>
+      </form>
 
       <div className="hidden h-9 items-center gap-2 rounded-full border border-border bg-card pl-1 pr-3 sm:flex">
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-xs font-bold text-background">
