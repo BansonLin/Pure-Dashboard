@@ -37,6 +37,20 @@ export interface BusinessUnit {
   note?: string;
 }
 
+/** T2/T5 資料接入狀態 — 決定該 BU 在儀表板的呈現方式 */
+export type BuDataStatus = "live" | "monitor" | "partial" | "none";
+
+/** T2 BU ↔ 法人對照 */
+export interface BuEntityInfo {
+  buId: BuId;
+  /** 法人名稱；待確認者為 undefined */
+  legalName?: string;
+  /** 統一編號；待確認者為 undefined */
+  taxId?: string;
+  dataStatus: BuDataStatus;
+  note?: string;
+}
+
 export interface MonthlyRevenuePoint {
   /** ISO month e.g. "2026-01" */
   month: string;
