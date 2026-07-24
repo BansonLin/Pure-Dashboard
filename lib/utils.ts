@@ -19,7 +19,12 @@ export function formatTwd(amount: number, opts: { compact?: boolean } = {}) {
     return `${(amount / 100_000_000).toFixed(2)} 億`;
   }
   if (Math.abs(amount) >= 10_000) {
-    return `${Math.round(amount / 10_000).toLocaleString("zh-TW")} 萬`;
+    const wan = amount / 10_000;
+    // 100 萬以下且非整數 → 保留一位小數（如 31.5 萬），避免小額失真
+    if (Math.abs(wan) < 100 && !Number.isInteger(wan)) {
+      return `${wan.toFixed(1)} 萬`;
+    }
+    return `${Math.round(wan).toLocaleString("zh-TW")} 萬`;
   }
   return amount.toLocaleString("zh-TW");
 }

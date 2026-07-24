@@ -14,13 +14,15 @@ import {
   fetchGroupMonthlyPnl,
   fetchGroupYtdPnl,
   fetchMaterialIndex,
+  fetchYilanCash,
 } from "@/lib/data";
+import { SourceTag } from "@/components/widgets/SourceTag";
 import { formatTwd, formatPercent } from "@/lib/utils";
 
 export const metadata = { title: "財務" };
 
 export default async function FinancePage() {
-  const [monthlyPnl, ytd, cashFlow, arAging, apAging, materials] =
+  const [monthlyPnl, ytd, cashFlow, arAging, apAging, materials, yilanCash] =
     await Promise.all([
       fetchGroupMonthlyPnl(),
       fetchGroupYtdPnl(),
@@ -28,9 +30,9 @@ export default async function FinancePage() {
       fetchArAging(),
       fetchApAging(),
       fetchMaterialIndex(),
+      fetchYilanCash(),
     ]);
 
-  const cashDelta = cashFlow.closing - cashFlow.opening;
   const arTotal = arAging.reduce((s, b) => s + b.amount, 0);
   const apTotal = apAging.reduce((s, b) => s + b.amount, 0);
   const aluminumIndex = materials.latest["鋁料"];
@@ -45,12 +47,26 @@ export default async function FinancePage() {
       <main className="flex-1 space-y-6 p-4 sm:p-6 lg:p-8">
         {/* KPI row */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* T6【實際】宜蘭法人現金水位 */}
+          <KpiCard
+            label="宜蘭法人現金水位"
+            value={formatTwd(yilanCash.total)}
+            hint={yilanCash.accounts
+              .map((a) => `${a.label} ${formatTwd(a.amount)}`)
+              .join(" · ")}
+            icon={Wallet}
+            accent="success"
+          >
+            <SourceTag provenance="actual" scope="collected" asOf={yilanCash.asOf} />
+          </KpiCard>
           <KpiCard
             label="YTD 營業收入"
             value={formatTwd(ytd.revenue)}
             hint="六大 BU 合計"
             icon={Activity}
-          />
+          >
+            <SourceTag provenance="mock" />
+          </KpiCard>
           <KpiCard
             label="YTD 淨利"
             value={formatTwd(ytd.netIncome)}
@@ -58,15 +74,9 @@ export default async function FinancePage() {
             icon={ytd.netIncome >= 0 ? TrendingUp : TrendingDown}
             trend={ytd.netIncome >= 0 ? "up" : "down"}
             accent={ytd.netMargin >= 0.1 ? "success" : "warning"}
-          />
-          <KpiCard
-            label="期末現金部位"
-            value={formatTwd(cashFlow.closing)}
-            hint={`較年初 ${cashDelta >= 0 ? "+" : ""}${formatTwd(cashDelta)}`}
-            delta={`${cashDelta >= 0 ? "+" : ""}${formatPercent(cashDelta / cashFlow.opening, 1)} YTD`}
-            trend={cashDelta >= 0 ? "up" : "down"}
-            icon={Wallet}
-          />
+          >
+            <SourceTag provenance="mock" />
+          </KpiCard>
           <KpiCard
             label="鋁料價格指數"
             value={`${aluminumIndex}`}
@@ -75,16 +85,24 @@ export default async function FinancePage() {
             trend="up"
             icon={TrendingUp}
             accent="danger"
-          />
+          >
+            <SourceTag provenance="mock" />
+          </KpiCard>
         </section>
 
         {/* 合併損益 */}
         <Card>
           <CardHeader>
-            <CardTitle>集團合併損益</CardTitle>
-            <CardDescription>
-              六大 BU 加總，2026 年 1–5 月，單位：新台幣
-            </CardDescription>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <CardTitle>集團合併損益</CardTitle>
+                <CardDescription>
+                  六大 BU 加總，2026 年 1–5 月，單位：新台幣。
+                  待交換表（W2）與藍途記帳穩定後接真。
+                </CardDescription>
+              </div>
+              <SourceTag provenance="mock" />
+            </div>
           </CardHeader>
           <CardContent>
             <PnlTable rows={monthlyPnl} />
@@ -96,7 +114,10 @@ export default async function FinancePage() {
           <CardHeader>
             <div className="flex flex-wrap items-end justify-between gap-2">
               <div>
-                <CardTitle>YTD 現金流瀑布</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle>YTD 現金流瀑布</CardTitle>
+                  <SourceTag provenance="mock" />
+                </div>
                 <CardDescription>
                   自 1/1 期初 {formatTwd(cashFlow.opening)} 到 5/31 期末{" "}
                   {formatTwd(cashFlow.closing)}
@@ -131,10 +152,15 @@ export default async function FinancePage() {
         {/* 原物料 */}
         <Card>
           <CardHeader>
-            <CardTitle>原物料成本指數</CardTitle>
-            <CardDescription>
-              2025/12 = 100；鋁料已 +40%、板材 +38%、系統櫃 +34%
-            </CardDescription>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <CardTitle>原物料成本指數</CardTitle>
+                <CardDescription>
+                  2025/12 = 100；鋁料已 +40%、板材 +38%、系統櫃 +34%
+                </CardDescription>
+              </div>
+              <SourceTag provenance="mock" />
+            </div>
           </CardHeader>
           <CardContent>
             <MaterialsCostChart points={materials.points} />

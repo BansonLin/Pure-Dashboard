@@ -1,4 +1,5 @@
 import { cn, formatTwd, formatPercent } from "@/lib/utils";
+import { SourceTag } from "./SourceTag";
 import type { AgingBucket } from "@/lib/types";
 
 interface AgingTableProps {
@@ -54,8 +55,9 @@ export function AgingTable({ title, buckets, tone = "receivable" }: AgingTablePr
           </span>
           <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
         </div>
-        <span className="text-xs text-muted-foreground tabular-nums">
+        <span className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
           合計 {formatTwd(total)}
+          <SourceTag provenance="mock" />
         </span>
       </div>
 

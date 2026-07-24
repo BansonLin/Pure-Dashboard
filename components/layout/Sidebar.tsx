@@ -117,7 +117,7 @@ export function Sidebar({ bus, riskTotal, riskCritical }: SidebarProps) {
         <div className="rounded-lg bg-muted/60 p-3">
           <p className="text-xs font-medium">2026 數據打底年</p>
           <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
-            本儀表板為 V1 Mock，待 ERP / 會計系統介接後將自動更新。
+            宜蘭已接入實際簽約與現金水位；其餘 BU 待交換表（W2）填報後點亮。灰標「示意數據」非真值。
           </p>
         </div>
       </div>

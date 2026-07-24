@@ -39,7 +39,7 @@ export function TopBar({ title, description }: TopBarProps) {
 
       <div className="hidden items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground sm:flex">
         <CalendarDays className="h-3.5 w-3.5" />
-        <span className="tabular-nums">{REPORT_DATE_DISPLAY}</span>
+        <span className="tabular-nums">合約資料截至 {REPORT_DATE_DISPLAY}</span>
       </div>
 
       <ThemeToggle />

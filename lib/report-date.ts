@@ -1,14 +1,18 @@
 import { differenceInCalendarDays } from "date-fns";
 
 /**
- * 報表基準日 — 全站唯一的「今天」。
- * Mock 資料截至 2026/05 月底，因此基準日固定在 5/25；
- * 階段三接真 API 後，改為由後端回傳的資料截止時間驅動。
+ * 報表基準日 — 全站「營運資料截至日」。
+ * T7：以合約管理表單匯出日 2026-06-01 為準。
+ * W2 交換表上線後，改為動態讀取交換表〈說明〉的「資料截至日」欄位
+ * （lib/parsers/exchange-sheet.ts 的 asOf）。
+ *
+ * 注意：信義止損板的倒數/燒錢累計用「伺服器當下時間」而非本基準日
+ * （見 lib/actuals/xinyi-stoploss.ts stopLossClock）。
  */
-export const REPORT_DATE_ISO = "2026-05-25";
+export const REPORT_DATE_ISO = "2026-06-01";
 
 /** TopBar 顯示用字串（預先排好版，避免 SSR/CSR 時區差異造成 hydration mismatch） */
-export const REPORT_DATE_DISPLAY = "2026 / 05 / 25 星期一";
+export const REPORT_DATE_DISPLAY = "2026 / 06 / 01 星期一";
 
 /**
  * 將 date-only 字串（YYYY-MM-DD）解析為「本地時區的當日零時」。

@@ -55,6 +55,26 @@ import {
   getTopActions,
   getUnresolvedRisks,
 } from "@/lib/mock/risk-data";
+import { ENTITY_MAP } from "@/lib/mock/entity-map";
+import {
+  CONTRACTS_AS_OF,
+  PUYU_SIGNINGS,
+  PUYU_TARGET,
+  XINYI_H1_SIGNED_INCL,
+  XINYI_TARGET,
+  YILAN_SIGNINGS,
+  YILAN_TARGET,
+  YILAN_YTD_INCL,
+  signingMonthTotal,
+  type MonthlySigning,
+} from "@/lib/actuals/contracts-2026";
+import {
+  CASH_AS_OF,
+  YILAN_CASH_ACCOUNTS,
+  YILAN_CASH_TOTAL,
+} from "@/lib/actuals/cash-2026";
+import { toExclTax } from "@/lib/terms";
+import type { BuEntityInfo } from "@/lib/types";
 
 // ---------- View models ----------
 
@@ -249,6 +269,91 @@ export async function fetchTopActions(limit = 5): Promise<ActionItemView[]> {
 
 export async function fetchRisksByBu(buId: string): Promise<RiskItemView[]> {
   return getRisksByBu(buId).map(toRiskView);
+}
+
+// ---------- T2 Entity map ----------
+
+export async function fetchEntityMap(): Promise<Record<string, BuEntityInfo>> {
+  return ENTITY_MAP;
+}
+
+// ---------- T3 宜蘭實際簽約 ----------
+
+export interface YilanSigningsView {
+  asOf: string;
+  taxBasis: "incl";
+  months: Array<MonthlySigning & { total: number }>;
+  ytdIncl: number;
+  ytdExcl: number;
+  target: number;
+  /** 含稅口徑達成率（目標稅基待 Patty 確認） */
+  achieveIncl: number;
+  achieveExcl: number;
+  /** 最近完整月（6 月僅至 6/1，不視為完整月） */
+  lastFullMonth: { label: string; total: number };
+  /** 最近完整月對前月增減率 */
+  momRatio: number;
+}
+
+export async function fetchYilanSignings(): Promise<YilanSigningsView> {
+  const months = YILAN_SIGNINGS.map((m) => ({
+    ...m,
+    total: signingMonthTotal(m),
+  }));
+  const may = months[4];
+  const apr = months[3];
+  return {
+    asOf: CONTRACTS_AS_OF,
+    taxBasis: "incl",
+    months,
+    ytdIncl: YILAN_YTD_INCL,
+    ytdExcl: toExclTax(YILAN_YTD_INCL),
+    target: YILAN_TARGET,
+    achieveIncl: YILAN_YTD_INCL / YILAN_TARGET,
+    achieveExcl: toExclTax(YILAN_YTD_INCL) / YILAN_TARGET,
+    lastFullMonth: { label: may.label, total: may.total },
+    momRatio: apr.total > 0 ? (may.total - apr.total) / apr.total : 0,
+  };
+}
+
+// ---------- T4 信義止損板基礎數字 ----------
+
+export async function fetchXinyiH1(): Promise<{
+  signedIncl: number;
+  target: number;
+  ratio: number;
+  asOf: string;
+}> {
+  return {
+    signedIncl: XINYI_H1_SIGNED_INCL,
+    target: XINYI_TARGET,
+    ratio: XINYI_H1_SIGNED_INCL / XINYI_TARGET,
+    asOf: CONTRACTS_AS_OF,
+  };
+}
+
+// ---------- T5 璞域部分接入 ----------
+
+export async function fetchPuyuPartial() {
+  const known = PUYU_SIGNINGS.reduce((s, x) => s + x.amount, 0);
+  return {
+    signings: PUYU_SIGNINGS,
+    knownTotal: known,
+    target: PUYU_TARGET,
+    ratio: known / PUYU_TARGET,
+    asOf: CONTRACTS_AS_OF,
+  };
+}
+
+// ---------- T6 實際現金水位 ----------
+
+export async function fetchYilanCash() {
+  return {
+    asOf: CASH_AS_OF,
+    accounts: YILAN_CASH_ACCOUNTS,
+    total: YILAN_CASH_TOTAL,
+    entityLabel: "璞石創研宜蘭（82965868）",
+  };
 }
 
 export type { OrgNode };

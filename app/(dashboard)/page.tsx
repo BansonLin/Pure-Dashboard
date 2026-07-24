@@ -1,4 +1,5 @@
-import { Activity, Building2, Target, AlertOctagon, Briefcase } from "lucide-react";
+import Link from "next/link";
+import { Activity, Building2, Target, AlertOctagon, Wallet } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 import { AlertBanner } from "@/components/widgets/AlertBanner";
 import { KpiCard } from "@/components/widgets/KpiCard";
@@ -6,33 +7,48 @@ import { BuMatrix } from "@/components/widgets/BuMatrix";
 import { RevenueTrendChart } from "@/components/widgets/RevenueTrendChart";
 import { RevenueProgressBar } from "@/components/widgets/RevenueProgressBar";
 import { ActionList } from "@/components/widgets/ActionList";
+import { SourceTag } from "@/components/widgets/SourceTag";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 import {
   fetchBusinessUnits,
-  fetchBuSeries,
-  fetchGroupRevenueSummary,
-  fetchRevenueChartData,
+  fetchEntityMap,
   fetchRiskCounts,
   fetchTopActions,
+  fetchXinyiH1,
+  fetchYilanCash,
+  fetchYilanSignings,
 } from "@/lib/data";
 import { formatTwd, formatPercent } from "@/lib/utils";
 
+// 信義止損倒數需要「今天」，故本頁改為動態渲染（T4）
+export const dynamic = "force-dynamic";
+
+/** 簽約類別的圖表用色 */
+const CATEGORY_SERIES = [
+  { key: "工程", name: "工程", color: "#0d9488" },
+  { key: "設計", name: "設計", color: "#6366f1" },
+  { key: "提案", name: "提案", color: "#d97706" },
+];
+
 export default async function GroupOverviewPage() {
-  const [bus, series, revenue, chartData, riskCounts, topActions] =
+  const [bus, entityMap, yilan, xinyi, cash, riskCounts, topActions] =
     await Promise.all([
       fetchBusinessUnits(),
-      fetchBuSeries(),
-      fetchGroupRevenueSummary(),
-      fetchRevenueChartData(),
+      fetchEntityMap(),
+      fetchYilanSignings(),
+      fetchXinyiH1(),
+      fetchYilanCash(),
       fetchRiskCounts(),
       fetchTopActions(5),
     ]);
 
-  const yilan = bus.find((b) => b.id === "design-yilan")!;
-  const xinyi = bus.find((b) => b.id === "design-xinyi")!;
-  const totalActiveProjects = bus.reduce((s, b) => s + b.activeProjects, 0);
-  const momPct = revenue.momRatio * 100;
+  const chartData = yilan.months.map((m) => ({
+    label: m.label,
+    工程: m.工程,
+    設計: m.設計,
+    提案: m.提案,
+  }));
 
   return (
     <>
@@ -47,60 +63,63 @@ export default async function GroupOverviewPage() {
           highCount={riskCounts.high}
         />
 
-        {/* KPI Row */}
+        {/* KPI Row — T3 校準後：只呈現已接入真值的指標 */}
         <section
           aria-label="核心 KPI"
           className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5"
         >
           <KpiCard
-            label="集團當月營收"
-            value={formatTwd(revenue.currentMonth)}
-            hint={revenue.monthLabel}
-            delta={`${momPct >= 0 ? "+" : ""}${momPct.toFixed(1)}% MoM`}
-            trend={momPct >= 0 ? "up" : "down"}
+            label="宜蘭 YTD 簽約"
+            value={formatTwd(yilan.ytdIncl)}
+            hint={`未稅約 ${formatTwd(yilan.ytdExcl)}`}
             icon={Activity}
-          />
+            accent="success"
+          >
+            <SourceTag provenance="actual" scope="signed" tax="incl" asOf={yilan.asOf} />
+          </KpiCard>
           <KpiCard
-            label="宜蘭年度進度"
-            value={formatPercent(yilan.ytdRevenue / yilan.annualTarget, 1)}
-            hint={`vs ${formatTwd(yilan.annualTarget)} 目標`}
+            label="宜蘭年度達成"
+            value={formatPercent(yilan.achieveIncl, 1)}
+            hint={`vs ${formatTwd(yilan.target)} 目標（稅基待確認，同口徑計）`}
             icon={Target}
-            accent="warning"
+            accent="success"
           >
             <RevenueProgressBar
-              current={yilan.ytdRevenue}
-              target={yilan.annualTarget}
+              current={yilan.ytdIncl}
+              target={yilan.target}
               showLabel={false}
-              barClassName="bg-warning"
+              barClassName="bg-success"
             />
           </KpiCard>
           <KpiCard
-            label="信義年度進度"
-            value={formatPercent(xinyi.ytdRevenue / xinyi.annualTarget, 1)}
-            hint={`vs ${formatTwd(xinyi.annualTarget)} 目標`}
-            icon={Target}
-            accent="danger"
+            label={`宜蘭 ${yilan.lastFullMonth.label}簽約`}
+            value={formatTwd(yilan.lastFullMonth.total)}
+            hint="最近完整月"
+            delta={`${yilan.momRatio >= 0 ? "+" : ""}${(yilan.momRatio * 100).toFixed(0)}% MoM`}
+            trend={yilan.momRatio >= 0 ? "up" : "down"}
+            icon={Activity}
           >
-            <RevenueProgressBar
-              current={xinyi.ytdRevenue}
-              target={xinyi.annualTarget}
-              showLabel={false}
-              barClassName="bg-danger"
-            />
+            <SourceTag provenance="actual" scope="signed" tax="incl" asOf={yilan.asOf} />
           </KpiCard>
           <KpiCard
-            label="進行中專案"
-            value={`${totalActiveProjects}`}
-            hint="六大事業體合計"
-            icon={Briefcase}
-          />
-          <KpiCard
-            label="風險數"
-            value={`${riskCounts.total}`}
-            hint={`紅燈 ${riskCounts.critical} · 高 ${riskCounts.high} · 中 ${riskCounts.medium}`}
-            icon={AlertOctagon}
-            accent={riskCounts.critical > 0 ? "danger" : "warning"}
-          />
+            label="宜蘭法人現金水位"
+            value={formatTwd(cash.total)}
+            hint={cash.entityLabel}
+            icon={Wallet}
+          >
+            <SourceTag provenance="actual" scope="collected" asOf={cash.asOf} />
+          </KpiCard>
+          <Link href="/bu/design-xinyi" className="contents">
+            <KpiCard
+              label="信義止損觀察"
+              value={formatPercent(xinyi.ratio, 1)}
+              hint={`H1 簽約 ${formatTwd(xinyi.signedIncl)} / ${formatTwd(xinyi.target)}`}
+              icon={AlertOctagon}
+              accent="danger"
+            >
+              <SourceTag provenance="actual" scope="signed" tax="incl" asOf={xinyi.asOf} />
+            </KpiCard>
+          </Link>
         </section>
 
         {/* BU Matrix */}
@@ -108,36 +127,38 @@ export default async function GroupOverviewPage() {
           <SectionHeader
             icon={Building2}
             title="六大事業體"
-            description="點擊卡片可進入該事業體詳情頁"
+            description="僅宜蘭已接入真值；其餘依接入狀態誠實標示"
           />
-          <BuMatrix bus={bus} />
+          <BuMatrix bus={bus} entityMap={entityMap} />
         </section>
 
         {/* Trend + Actions */}
         <section className="grid gap-6 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardHeader>
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <CardTitle>月度營收趨勢</CardTitle>
+                  <CardTitle>宜蘭月度簽約趨勢</CardTitle>
                   <CardDescription>
-                    2026 年 1–5 月，依事業體堆疊
+                    2026 年 1–6 月，依提案 / 設計 / 工程分類（6 月僅計至 6/1）
                   </CardDescription>
                 </div>
-                <span className="hidden text-xs text-muted-foreground sm:block">
-                  單位：新台幣
-                </span>
+                <SourceTag provenance="actual" scope="signed" tax="incl" asOf={yilan.asOf} />
               </div>
             </CardHeader>
             <CardContent>
-              <RevenueTrendChart data={chartData} series={series} />
+              <RevenueTrendChart
+                data={chartData}
+                series={CATEGORY_SERIES}
+                ariaLabel="宜蘭 2026 年 1 至 6 月簽約金額，依提案、設計、工程分類堆疊"
+              />
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle>本週行動 Top 5</CardTitle>
-              <CardDescription>依風險嚴重度排序</CardDescription>
+              <CardDescription>依風險嚴重度排序（評分為示意）</CardDescription>
             </CardHeader>
             <CardContent>
               <ActionList actions={topActions} />

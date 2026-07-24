@@ -12,35 +12,40 @@ import {
   Legend,
 } from "recharts";
 import { formatTwd } from "@/lib/utils";
-import { buColor } from "@/lib/ui/chart-colors";
-import type { BuSeries } from "@/lib/data";
+
+export interface TrendSeries {
+  key: string;
+  name: string;
+  color: string;
+}
 
 interface RevenueTrendChartProps {
   data: Array<Record<string, number | string>>;
-  series: BuSeries[];
+  series: TrendSeries[];
+  ariaLabel?: string;
 }
 
-export function RevenueTrendChart({ data, series }: RevenueTrendChartProps) {
+export function RevenueTrendChart({ data, series, ariaLabel }: RevenueTrendChartProps) {
   return (
     <div
       className="h-[320px] w-full"
       role="img"
-      aria-label="2026 年 1 至 5 月各事業體月度營收堆疊面積圖"
+      aria-label={ariaLabel ?? "月度金額堆疊面積圖"}
     >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
           <defs>
-            {series.map((bu) => (
+            {series.map((sr) => (
               <linearGradient
-                key={bu.id}
-                id={`grad-${bu.id}`}
+                key={sr.key}
+                id={`grad-${sr.key}`}
                 x1="0"
                 y1="0"
                 x2="0"
                 y2="1"
               >
-                <stop offset="0%" stopColor={buColor(bu.id)} stopOpacity={0.4} />
-                <stop offset="100%" stopColor={buColor(bu.id)} stopOpacity={0} />
+                <stop offset="0%" stopColor={sr.color} stopOpacity={0.4} />
+                <stop offset="100%" stopColor={sr.color} stopOpacity={0} />
               </linearGradient>
             ))}
           </defs>
@@ -69,16 +74,16 @@ export function RevenueTrendChart({ data, series }: RevenueTrendChartProps) {
             iconType="circle"
             wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
           />
-          {series.map((bu) => (
+          {series.map((sr) => (
             <Area
-              key={bu.id}
+              key={sr.key}
               type="monotone"
-              dataKey={bu.id}
-              name={bu.name}
+              dataKey={sr.key}
+              name={sr.name}
               stackId="1"
-              stroke={buColor(bu.id)}
+              stroke={sr.color}
               strokeWidth={1.5}
-              fill={`url(#grad-${bu.id})`}
+              fill={`url(#grad-${sr.key})`}
             />
           ))}
         </AreaChart>

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 import { fetchRiskCounts, fetchUnresolvedRisks } from "@/lib/data";
 import { isOverdue } from "@/lib/report-date";
+import { SourceTag } from "@/components/widgets/SourceTag";
 
 export const metadata = { title: "風險預警" };
 
@@ -62,10 +63,16 @@ export default async function RiskPage() {
         {/* Matrix */}
         <Card>
           <CardHeader>
-            <CardTitle>風險矩陣</CardTitle>
-            <CardDescription>
-              影響度（縱）× 發生機率（橫），點擊圓點可定位到下方清單
-            </CardDescription>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <CardTitle>風險矩陣</CardTitle>
+                <CardDescription>
+                  影響度（縱）× 發生機率（橫），點擊圓點可定位到下方清單。
+                  風險項目為定調會盤點；影響/機率評分為示意，待月會共識校準。
+                </CardDescription>
+              </div>
+              <SourceTag provenance="mock" />
+            </div>
           </CardHeader>
           <CardContent>
             <RiskMatrix risks={risks} />

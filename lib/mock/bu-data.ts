@@ -1,5 +1,11 @@
 import type { BusinessUnit } from "@/lib/types";
 import { PROJECTS } from "./project-data";
+import {
+  XINYI_H1_SIGNED_INCL,
+  YILAN_SIGNINGS,
+  YILAN_YTD_INCL,
+  signingMonthTotal,
+} from "@/lib/actuals/contracts-2026";
 
 /**
  * 六大事業體 - 截至 2026/05 月底
@@ -16,17 +22,19 @@ const RAW_BUSINESS_UNITS: Array<Omit<BusinessUnit, "activeProjects">> = [
     category: "interior",
     ownership: "direct",
     annualTarget: 80_000_000,
-    ytdRevenue: 25_800_000,        // ~32.3%
-    monthlyRevenue: 6_200_000,
+    // 【實際】YTD 簽約（含稅），由 lib/actuals 月別推導
+    ytdRevenue: YILAN_YTD_INCL,
+    // 【實際】最近完整月（2026-05）簽約
+    monthlyRevenue: signingMonthTotal(YILAN_SIGNINGS[4]),
     headcount: 12,
-    status: "amber",
+    status: "green",
     statusReason: [
-      "YTD 達成 32.3%、略低於線性目標 41.7%（5/12），落後但可追。",
-      "5 月簽約量回穩，月營收 620 萬為近半年高點。",
-      "設計師人均負載已達 1.5 案/人，再接案將影響交付品質。",
-      "主管職由許舒婷暫代逾三個月仍未轉正、指揮鏈不穩。",
+      "H1 簽約 4,905 萬（含稅）、達成 61.3%，進度超前線性目標。",
+      "5 月單月工程簽約 2,810 萬為主因。",
+      "風險在交付產能而非案源：工務排程與人力負載需盯緊。",
+      "主管職由許舒婷暫代未轉正議題仍待處理（見風險清單）。",
     ],
-    note: "5 月簽約量回穩，但設計師人均負載已達警戒。",
+    note: "H1 簽約超前；風險在交付產能而非案源。",
   },
   {
     id: "design-xinyi",
@@ -35,8 +43,10 @@ const RAW_BUSINESS_UNITS: Array<Omit<BusinessUnit, "activeProjects">> = [
     category: "interior",
     ownership: "direct",
     annualTarget: 50_000_000,
-    ytdRevenue: 15_100_000,        // ~30.2%
-    monthlyRevenue: 3_400_000,
+    // 【實際】H1 簽約（含稅）— 止損板輸入
+    ytdRevenue: XINYI_H1_SIGNED_INCL,
+    monthlyRevenue: 0, // 月別未拆分
+
     headcount: 5,
     status: "red",
     statusReason: [
