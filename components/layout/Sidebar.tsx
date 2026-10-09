@@ -9,15 +9,12 @@ import {
   Wallet,
   Users,
   AlertTriangle,
-  Wand2,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buColor } from "@/lib/ui/chart-colors";
 import { useDashboardStore } from "@/store/dashboard-store";
 import type { BuSeries } from "@/lib/data";
-
-const TOOL_NAV = [{ href: "/render", label: "渲染工作台", icon: Wand2 }];
 
 const PRIMARY_NAV = [
   { href: "/", label: "集團總覽", icon: LayoutDashboard },
@@ -95,20 +92,6 @@ export function Sidebar({ bus, riskTotal, riskCritical }: SidebarProps) {
               </NavLink>
             );
           })}
-        </NavSection>
-
-        <NavSection label="工具">
-          {TOOL_NAV.map((item) => (
-            <NavLink
-              key={item.href}
-              href={item.href}
-              icon={item.icon}
-              active={pathname.startsWith(item.href)}
-              onClick={() => setSidebarOpen(false)}
-            >
-              {item.label}
-            </NavLink>
-          ))}
         </NavSection>
 
         <NavSection label="事業體">
